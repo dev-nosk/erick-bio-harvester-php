@@ -104,7 +104,9 @@
             $mail->setFrom('no-reply@cmc.com', 'Motortrade Notification');
 
             // Recipient
-            $mail->addAddress('reymark.cangque@cmc.com', 'Recipient Name');
+            $mail->addAddress('erick.adriano@cmc.com', 'Recipient Name');
+            $mail->addAddress('dtr@cmc.com', 'Recipient Name');
+            $mail->addAddress('rodney.brian@cmc.com', 'Recipient Name');
             $mail->addAttachment(__DIR__ . '/' . $filename, 'attendance.json');
             // Content
             $mail->isHTML(true);

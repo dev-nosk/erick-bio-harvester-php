@@ -74,7 +74,8 @@
     //$zk->clearAdmin();
     ?>
     <?php
-    $attendance = $zk->getAttendance();
+    $date_minus_one = date('Y-m-d', strtotime('-1 day'));
+    $attendance = $zk->getAttendance($date_minus_one);
     sleep(1);
     // Encode to JSON
     // var_dump('<pre>', json_encode($attendance));
@@ -109,6 +110,9 @@
     if (!is_dir($folder)) {
         mkdir($folder, 0777, true);
     }
+    chmod($folder, 0777);
+    chmod($filename, 0777);
+
 
     // Save encrypted file
     if (file_put_contents($filename, $final_data) !== false) {
