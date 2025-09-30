@@ -1,3 +1,6 @@
 .vscode/
 
 /vendor/
+/files/
+/db.txt
+/ips.txt

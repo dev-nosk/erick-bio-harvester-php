@@ -4,27 +4,38 @@
 $filename = __DIR__ . '/ips.txt';
 $savedIp = '';    // <- initialize so it's always defined
 $message = '';    // <- initialize message too
+$savedCompany = '';
+$savedBranchCode = '';
 
 // Handle save button
 if (isset($_POST['save_ip'])) {
     $ip = trim($_POST['ipaddress'] ?? '');
+    $company = trim($_POST['company'] ?? '');
+    $branchCode = trim($_POST['branch_code'] ?? '');
+
     if (filter_var($ip, FILTER_VALIDATE_IP)) {
-        // store IP (overwrite) and use LOCK_EX
-        file_put_contents($filename, $ip . PHP_EOL, LOCK_EX);
+        // store IP, company, and branch code (overwrite) and use LOCK_EX
+        $data = $ip . PHP_EOL . $company . PHP_EOL . $branchCode . PHP_EOL;
+        file_put_contents($filename, $data, LOCK_EX);
+
         $savedIp = $ip;
-        $message = "✅ IP address saved!";
+        $savedCompany = $company;
+        $savedBranchCode = $branchCode;
+
+        $message = "✅ IP address, Company, and Branch Code saved!";
     } else {
         $message = "❌ Invalid IP address.";
     }
 } else {
-    // load saved ip if file exists
+    // load saved ip, company, and branch code if file exists
     if (file_exists($filename)) {
-        $savedIp = trim(file_get_contents($filename));
+        $lines = file($filename, FILE_IGNORE_NEW_LINES);
+        $savedIp = isset($lines[0]) ? trim($lines[0]) : '';
+        $savedCompany = isset($lines[1]) ? trim($lines[1]) : '';
+        $savedBranchCode = isset($lines[2]) ? trim($lines[2]) : '';
     }
 }
 ?>
-
-
 
 <!DOCTYPE html>
 <html>
@@ -32,7 +43,7 @@ if (isset($_POST['save_ip'])) {
 <head>
     <title>Logs</title>
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="assets/css/all.css">
+    <link rel="stylesheet" href="">
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <!-- Material Design Bootstrap -->
@@ -79,11 +90,28 @@ if (isset($_POST['save_ip'])) {
                             placeholder="Enter Device IP"
                             value="<?php echo htmlspecialchars($savedIp); ?>">
                     </div>
-                    <button type="submit" name="save_ip" class="btn btn-success">💾 Save IP</button>
+                    <div class="form-group">
+                        <select name="company" id="company" class="form-control">
+                            <option value="MNC" <?php echo ($savedCompany == 'MNC') ? 'selected' : ''; ?>>MNC</option>
+                            <option value="HPTI" <?php echo ($savedCompany == 'HPTI') ? 'selected' : ''; ?>>HPTI</option>
+                            <option value="MTI" <?php echo ($savedCompany == 'MTI') ? 'selected' : ''; ?>>MTI</option>
+                            <option value="MDI" <?php echo ($savedCompany == 'MDI') ? 'selected' : ''; ?>>MDI</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="branch_code" id="branch_code" class="form-control"
+                            placeholder="Enter Branch Code"
+                            value="<?php echo htmlspecialchars($savedBranchCode); ?>">
+                    </div>
+                    <button type="submit" name="save_ip" class="btn btn-success">💾 Save INFO</button>
                 </form>
 
                 <!-- FETCH button still works separately -->
                 <button id="fetch-bio" class="btn btn-primary">FETCH BIO</button>
+                <br>
+
+                <input type="checkbox" name="send-email" id="send-email">
+                <label for="send-email">force send email if record exist your local pc</label>
                 <p id="message"><?php echo isset($message) ? $message : ''; ?></p>
 
                 <table class="table table-striped table-bordered">
@@ -143,17 +171,16 @@ if (isset($_POST['save_ip'])) {
                                     $filename = basename($file);
                                     $file_no_ext = pathinfo($file, PATHINFO_FILENAME);
                                     $parts = explode("_", $file_no_ext);
-                                    $datePart = $parts[1]; // 20250924
-                                    $timePart = $parts[2]; // 113219
+                                    $datePart = $parts[3]; // 20250924
+                                    $timePart = $parts[4]; // 113219
                                     $datetimeStr = $datePart . $timePart;
                                     $exedatetime = DateTime::createFromFormat("YmdHis", $datetimeStr);
 
-
                                     echo "<tr>";
                                     echo "<td>" . $filename . "</td>";
-                                    echo "<td>" . $exedatetime->format('F d, Y H:i:s A'). "</td>";
+                                    echo "<td>" . ($exedatetime instanceof DateTime ? $exedatetime->format('F d, Y H:i:s A') : 'Invalid Date') . "</td>";
                                     echo "<td><a href='get_file_data.php?file=" . $file_no_ext . "' type='button' class='btn btn-success' target='_blank'>View</a></td>";
-                                    echo "<td><button class='btn btn-primary btn-sm resend'  data-filename='".$filename."'>Resend to payroll</button></td>"; // You can add functionality to this button
+                                    echo "<td><button class='btn btn-primary btn-sm resend'  data-filename='" . $filename . "'>Resend to payroll</button></td>"; // You can add functionality to this button
                                     echo "</tr>";
                                 }
                             }
@@ -177,16 +204,17 @@ if (isset($_POST['save_ip'])) {
 
     <script>
         $(document).ready(function() {
-            $('#fetch-bio').click(function() {
+            $(document).on('click', '#fetch-bio', function() {
+               var send_email = $('#send-email').is(':checked') ? '?send_email=true' : '';
                 const ip = $('#ipaddress').val().trim();
                 if (!ip) {
                     alert('Please enter a valid IP address.');
                     return;
                 }
                 $('#message').text('Your request is being processed, please check the new tab');
-                window.open('get-logs.php?ip_address=' + ip, '_blank');
+                window.open('get-logs.php' + send_email, '_blank');
             });
-    
+
         });
 
         $(document).on('click', '.resend', function() {
