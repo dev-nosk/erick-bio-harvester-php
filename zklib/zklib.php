@@ -208,8 +208,8 @@
             return zkclearadmin($this);
         }
         
-        public function getAttendance($date = null) {
-            return zkgetattendance($this , $date);
+        public function getAttendance($daterange =[]) {
+            return zkgetattendance($this , $daterange );
         }
         
         public function clearAttendance() {

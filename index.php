@@ -77,43 +77,17 @@ if (isset($_POST['save_ip'])) {
             <li class="nav-item">
                 <a class="nav-link" id="filedata-tab" data-toggle="tab" href="#filedata" role="tab" aria-controls="filedata" aria-selected="false">FILE DATA</a>
             </li>
+             <li class="nav-item">
+                <a class="nav-link" id="config-tab" data-toggle="tab" href="#config" role="tab" aria-controls="config" aria-selected="false">CONFIG</a>
+            </li>
         </ul>
 
         <!-- Tab Content -->
         <div class="tab-content" id="myTabContent">
 
             <!-- Logs Tab -->
-            <div class="tab-pane fade show active" id="logs" role="tabpanel" aria-labelledby="logs-tab">
-                <form method="post">
-                    <div class="form-group">
-                        <input type="text" name="ipaddress" id="ipaddress" class="form-control"
-                            placeholder="Enter Device IP"
-                            value="<?php echo htmlspecialchars($savedIp); ?>">
-                    </div>
-                    <div class="form-group">
-                        <select name="company" id="company" class="form-control">
-                            <option value="MNC" <?php echo ($savedCompany == 'MNC') ? 'selected' : ''; ?>>MNC</option>
-                            <option value="HPTI" <?php echo ($savedCompany == 'HPTI') ? 'selected' : ''; ?>>HPTI</option>
-                            <option value="MTI" <?php echo ($savedCompany == 'MTI') ? 'selected' : ''; ?>>MTI</option>
-                            <option value="MDI" <?php echo ($savedCompany == 'MDI') ? 'selected' : ''; ?>>MDI</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" name="branch_code" id="branch_code" class="form-control"
-                            placeholder="Enter Branch Code"
-                            value="<?php echo htmlspecialchars($savedBranchCode); ?>">
-                    </div>
-                    <button type="submit" name="save_ip" class="btn btn-success">💾 Save INFO</button>
-                </form>
-
-                <!-- FETCH button still works separately -->
-                <button id="fetch-bio" class="btn btn-primary">FETCH BIO</button>
-                <br>
-
-                <input type="checkbox" name="send-email" id="send-email">
-                <label for="send-email">force send email if record exist your local pc</label>
-                <p id="message"><?php echo isset($message) ? $message : ''; ?></p>
-
+            <div class="tab-pane fade show active" id="logs" role="tabpanel" aria-labelledby="logs-tab">  
+                <h3>All Logs</h3>
                 <table class="table table-striped table-bordered">
                     <thead class="thead-dark">
                         <tr>
@@ -189,7 +163,40 @@ if (isset($_POST['save_ip'])) {
                     </table>
                 </div>
             </div>
+            <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="config-tab">
+                <form method="post">
+                    <div class="form-group">
+                        <input type="text" name="ipaddress" id="ipaddress" class="form-control"
+                            placeholder="Enter Device IP"
+                            value="<?php echo htmlspecialchars($savedIp); ?>">
+                    </div>
+                    <div class="form-group">
+                        <select name="company" id="company" class="form-control">
+                            <option value="MNC" <?php echo ($savedCompany == 'MNC') ? 'selected' : ''; ?>>MNC</option>
+                            <option value="HPTI" <?php echo ($savedCompany == 'HPTI') ? 'selected' : ''; ?>>HPTI</option>
+                            <option value="MTI" <?php echo ($savedCompany == 'MTI') ? 'selected' : ''; ?>>MTI</option>
+                            <option value="MDI" <?php echo ($savedCompany == 'MDI') ? 'selected' : ''; ?>>MDI</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="branch_code" id="branch_code" class="form-control"
+                            placeholder="Enter Branch Code"
+                            value="<?php echo htmlspecialchars($savedBranchCode); ?>">
+                    </div>
+                    <button type="submit" name="save_ip" class="btn btn-success">💾 Save INFO</button>
+                </form>
+                <hr>
+                <label for="">Add date if manual date <i>Note : cron run every 4 days getting 4 days before today</i></label>
+                <input type="text" name="date_from" id="date_from" class="form-control" value="" placeholder="Date From" onfocus="(this.type='date')" onblur="(this.type='text')">
+                <input type="text" name="date_to" id="date_to" class="form-control" value="" placeholder="Date To" onfocus="(this.type='date')" onblur="(this.type='text')">
+                <!-- FETCH button still works separately -->
+                <button id="fetch-bio" class="btn btn-primary">FETCH BIO</button>
+                <br>
 
+                <input type="checkbox" name="send-email" id="send-email">
+                <label for="send-email">force send email if record exist your local pc</label>
+                <p id="message"><?php echo isset($message) ? $message : ''; ?></p>
+            </div>                
         </div>
     </div>
 
@@ -206,19 +213,28 @@ if (isset($_POST['save_ip'])) {
         $(document).ready(function() {
             $(document).on('click', '#fetch-bio', function() {
                var send_email = $('#send-email').is(':checked') ? '?send_email=true' : '';
+               var and = send_email ? '&' : '?';
+               var date_from = $('#date_from').val().trim();
+                var date_to = $('#date_to').val().trim();
+                if(date_from != '' || date_to != ''){
+                    var date = and+'date_from='+date_from+'&date_to='+date_to;
+                }
+
                 const ip = $('#ipaddress').val().trim();
                 if (!ip) {
                     alert('Please enter a valid IP address.');
                     return;
                 }
                 $('#message').text('Your request is being processed, please check the new tab');
-                window.open('get-logs.php' + send_email, '_blank');
+                window.open('get-logs.php' + send_email+date, 'frame');
             });
 
         });
 
         $(document).on('click', '.resend', function() {
             const filename = $(this).data('filename');
+            alert('Resend functionality is not implemented yet for ' + filename);
+            return;
             if (confirm('Are you sure you want to resend ' + filename + ' to payroll?')) {
                 // AJAX request to resend the file
                 // $.post('resend_to_payroll.php', { filename: filename }, function(response) {

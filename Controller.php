@@ -76,7 +76,7 @@
             return $data;
         }
 
-        public function sendMail($filename,$savedCompany,$savedBranchCode)
+        public function sendMail($filename,$savedCompany,$savedBranchCode,$email_body_date='')
     {
         
         $mail = new PHPMailer(true);
@@ -110,9 +110,12 @@
             $mail->addAttachment(__DIR__ . '/' . $filename, $attachmentName);
             // Content
             $mail->isHTML(true);
-            $mail->Subject = 'Attendance Data ' . date("Y-m-d H:i:s");
+            $mail->Subject = 'Attendance Data ' . date("Y-m-d H:i:s") .'| ' . $email_body_date;
             $mail->Body    = '<p>Good day!,</p>
                             <p>Please find the attached encrypted attendance data file.</p>
+                            <p>Company: <strong>' . htmlspecialchars($savedCompany) . '</strong></p>
+                            <p>Branch Code: <strong>' . htmlspecialchars($savedBranchCode) . '</strong></p>
+                            <p>Date: <strong>' . ($email_body_date) . '</strong></p>
                             <p>Best regards,<br>Motortrade Notification System</p> 
                             <p style="font-size: small; color: gray;">This is an automated message. Please do not reply.</p>';
             $mail->AltBody = 'do not reply to this email.';
