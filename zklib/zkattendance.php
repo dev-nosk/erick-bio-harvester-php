@@ -28,7 +28,7 @@
         }
     }
 
-    function zkgetattendance($self, $date = null) {
+    function zkgetattendance($self, $daterange =[]) {
         $command = CMD_ATTLOG_RRQ;
         $command_string = '';
         $chksum = 0;
@@ -87,24 +87,32 @@
 
                 // Extract timestamp
                 $timestamp = decode_time( hexdec( reverseHex( substr($u[1], 58, 8) ) ) ); 
-
+                $date_logs = date('Y-m-d', strtotime($timestamp));
                 // If $date is set, filter by date (format: 'Y-m-d')
-                if ($date !== null) {
-                    $recordDate = date('Y-m-d', strtotime($timestamp));
-                    if ($recordDate !== $date) {
-                        $attendancedata = substr( $attendancedata, 40 );
-                        continue;
+                if(!empty($daterange)){
+                    foreach($daterange as $dr){
+                        if($date_logs == $dr){
+                            array_push( $attendance, array(
+                                'uid' => $uid,
+                                'userid' => $userid, // user id as string
+                                'id' => $id,         // user id as integer (legacy)
+                                'fingerprintid' => $fingerprintid,
+                                'state' => $state,
+                                'timestamp' => $timestamp
+                            ));
+                        }
                     }
                 }
-
-                array_push( $attendance, array(
-                    'uid' => $uid,
-                    'userid' => $userid, // user id as string
-                    'id' => $id,         // user id as integer (legacy)
-                    'fingerprintid' => $fingerprintid,
-                    'state' => $state,
-                    'timestamp' => $timestamp
-                ));
+                else{
+                    array_push( $attendance, array(
+                        'uid' => $uid,
+                        'userid' => $userid, // user id as string
+                        'id' => $id,         // user id as integer (legacy)
+                        'fingerprintid' => $fingerprintid,
+                        'state' => $state,
+                        'timestamp' => $timestamp
+                    ));
+                }
                 
                 $attendancedata = substr( $attendancedata, 40 );
             }

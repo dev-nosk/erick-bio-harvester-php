@@ -5,7 +5,7 @@
 </head>
 
 <body>
-    <?php
+    <?php 
     $filename = __DIR__ . '/ips.txt';
     if (file_exists($filename)) {
         $lines = file($filename, FILE_IGNORE_NEW_LINES);
@@ -23,6 +23,21 @@
         echo "Please set the IP Address, Company, and Branch Code in <a href='index.php'>the home page</a> first.";
         exit;
     }
+
+    $date_from_minus_4_days = isset($_GET['date_from']) ?  $_GET['date_from'] : date('Y-m-d', strtotime('-4 days'));
+    $date_from = isset($_GET['date_from']) ?  $_GET['date_from'] : date('Y-m-d', strtotime('-4 days'));
+    $date_to = isset($_GET['date_to']) ?  $_GET['date_to'] : date('Y-m-d', strtotime('-1 day'));
+    $email_body_date = "date from ".$date_from." to ".$date_to;
+    $date_range = array();
+    $current = strtotime($date_from);
+    $last = strtotime($date_to);
+
+    while( $current <= $last ) {
+
+        $date_range[] = date('Y-m-d', $current);
+        $current = strtotime('+1 day', $current);
+    }
+
   
     include("zklib/zklib.php");
     $zk = new ZKLib($savedIp, 4370);
@@ -85,8 +100,10 @@
     //$zk->clearAdmin();
     ?>
     <?php
-    $date_minus_one = date('Y-m-d', strtotime('-1 day'));
-    $attendance = $zk->getAttendance();
+    
+   
+    $attendance = $zk->getAttendance($date_range);
+
     sleep(1);
 
     if (empty($attendance)) {
@@ -119,8 +136,8 @@
     if (!is_dir($folder)) {
         mkdir($folder, 0777, true);
     }
-    chmod($folder, 0777);
-    chmod($filename, 0777);
+    // chmod($folder, 0777);
+    // chmod($filename, 0777);
 
 
     // Save encrypted file
@@ -138,7 +155,7 @@
             if (!$result['error']) $count_inserted++;
             echo $result['message'] . "<br>";
         }
-        $res =   $db->sendMail($filename,$savedCompany,$savedBranchCode);
+        $res =   $db->sendMail($filename,$savedCompany,$savedBranchCode,$email_body_date);
         $count_inserted =  isset($_GET['send_email']) ? 1 : 0;
         if ($res == 1 && $count_inserted > 0) {
             echo "✅ Email sent successfully.";
