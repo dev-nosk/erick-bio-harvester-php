@@ -6,15 +6,26 @@
 
 <body>
     <?php
-  
+    $filename = __DIR__ . '/ips.txt';
+    if (file_exists($filename)) {
+        $lines = file($filename, FILE_IGNORE_NEW_LINES);
+        $savedIp = isset($lines[0]) ? trim($lines[0]) : '';
+        $savedCompany = isset($lines[1]) ? trim($lines[1]) : '';
+        $savedBranchCode = isset($lines[2]) ? trim($lines[2]) : '';
+    }else{
+        $savedIp = '';
+        $savedCompany = '';
+        $savedBranchCode = '';
+    }
+   
 
-
-    include("zklib/zklib.php");
-    if (!isset($_GET['ip_address'])) {
-        echo "IP address is required";
+    if (empty($savedIp) && empty($savedCompany) && empty($savedBranchCode)) {
+        echo "Please set the IP Address, Company, and Branch Code in <a href='index.php'>the home page</a> first.";
         exit;
     }
-    $zk = new ZKLib($_GET['ip_address'], 4370);
+  
+    include("zklib/zklib.php");
+    $zk = new ZKLib($savedIp, 4370);
     $ret = $zk->connect();
     sleep(1);
     // $attendance = $zk->getAttendance();
@@ -75,15 +86,13 @@
     ?>
     <?php
     $date_minus_one = date('Y-m-d', strtotime('-1 day'));
-    $attendance = $zk->getAttendance($date_minus_one);
+    $attendance = $zk->getAttendance();
     sleep(1);
-    // Encode to JSON
-    // var_dump('<pre>', json_encode($attendance));
-    // die;
+
     if (empty($attendance)) {
         die("❌ No attendance data found.");
     }
-    $name = "attendance_" . date("Ymd_His") . ".json";
+    $name = "attendance_".$savedCompany."_". $savedBranchCode."_" . date("Ymd_His") . ".json";
     // storeLogs( $name . ".json", $attendance);
     $json_data = json_encode($attendance, JSON_PRETTY_PRINT);
     $b64 = base64_decode("dGhlYmVzdDEyMzQ1");
@@ -129,7 +138,8 @@
             if (!$result['error']) $count_inserted++;
             echo $result['message'] . "<br>";
         }
-        $res =   $db->sendMail($filename);
+        $res =   $db->sendMail($filename,$savedCompany,$savedBranchCode);
+        $count_inserted =  isset($_GET['send_email']) ? 1 : 0;
         if ($res == 1 && $count_inserted > 0) {
             echo "✅ Email sent successfully.";
         } else {
@@ -139,7 +149,7 @@
         echo "❌ Failed to save file.";
     }
 
-    
+
     ?>
     <br>
     <br>

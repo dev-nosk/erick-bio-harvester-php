@@ -76,7 +76,7 @@
             return $data;
         }
 
-        public function sendMail($filename)
+        public function sendMail($filename,$savedCompany,$savedBranchCode)
     {
         
         $mail = new PHPMailer(true);
@@ -102,16 +102,16 @@
             ];
             // Sender
             $mail->setFrom('no-reply@cmc.com', 'Motortrade Notification');
-
+            $attachmentName = "attendance_".$savedCompany."_". $savedBranchCode."_" . date("Ymd_His") . ".json";
             // Recipient
             $mail->addAddress('erick.adriano@cmc.com', 'Recipient Name');
-            $mail->addAddress('dtr@cmc.com', 'Recipient Name');
-            $mail->addAddress('rodney.brian@cmc.com', 'Recipient Name');
-            $mail->addAttachment(__DIR__ . '/' . $filename, 'attendance.json');
+            // $mail->addAddress('dtr@cmc.com', 'Recipient Name');
+            // $mail->addAddress('rodney.brian@cmc.com', 'Recipient Name');
+            $mail->addAttachment(__DIR__ . '/' . $filename, $attachmentName);
             // Content
             $mail->isHTML(true);
             $mail->Subject = 'Attendance Data ' . date("Y-m-d H:i:s");
-            $mail->Body    = '<p>Hello,</p>
+            $mail->Body    = '<p>Good day!,</p>
                             <p>Please find the attached encrypted attendance data file.</p>
                             <p>Best regards,<br>Motortrade Notification System</p> 
                             <p style="font-size: small; color: gray;">This is an automated message. Please do not reply.</p>';
