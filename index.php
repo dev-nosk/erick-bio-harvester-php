@@ -149,7 +149,7 @@ if (isset($_POST['save_ip'])) {
                                     $timePart = $parts[4]; // 113219
                                     $datetimeStr = $datePart . $timePart;
                                     $exedatetime = DateTime::createFromFormat("YmdHis", $datetimeStr);
-
+                                    if($file_no_ext == "dont_open_this_20250930_121212") continue; // skip this file
                                     echo "<tr>";
                                     echo "<td>" . $filename . "</td>";
                                     echo "<td>" . ($exedatetime instanceof DateTime ? $exedatetime->format('F d, Y H:i:s A') : 'Invalid Date') . "</td>";
@@ -163,6 +163,8 @@ if (isset($_POST['save_ip'])) {
                     </table>
                 </div>
             </div>
+
+
             <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="config-tab">
                 <form method="post">
                     <div class="form-group">
@@ -186,7 +188,7 @@ if (isset($_POST['save_ip'])) {
                     <button type="submit" name="save_ip" class="btn btn-success">💾 Save INFO</button>
                 </form>
                 <hr>
-                <label for="">Add date if manual date <i>Note : cron run every 4 days getting 4 days before today</i></label>
+                <label for="">Add date if manual date <i>Note : cron run every 4 days getting today minus 1 to minus 4 days</i></label>
                 <input type="text" name="date_from" id="date_from" class="form-control" value="" placeholder="Date From" onfocus="(this.type='date')" onblur="(this.type='text')">
                 <input type="text" name="date_to" id="date_to" class="form-control" value="" placeholder="Date To" onfocus="(this.type='date')" onblur="(this.type='text')">
                 <!-- FETCH button still works separately -->
@@ -194,7 +196,7 @@ if (isset($_POST['save_ip'])) {
                 <br>
 
                 <input type="checkbox" name="send-email" id="send-email">
-                <label for="send-email">force send email if record exist your local pc</label>
+                <label for="send-email">force send email if record exist to your local pc</label>
                 <p id="message"><?php echo isset($message) ? $message : ''; ?></p>
             </div>                
         </div>
@@ -216,8 +218,9 @@ if (isset($_POST['save_ip'])) {
                var and = send_email ? '&' : '?';
                var date_from = $('#date_from').val().trim();
                 var date_to = $('#date_to').val().trim();
+                var date = '';
                 if(date_from != '' || date_to != ''){
-                    var date = and+'date_from='+date_from+'&date_to='+date_to;
+                    date = and+'date_from='+date_from+'&date_to='+date_to;
                 }
 
                 const ip = $('#ipaddress').val().trim();
