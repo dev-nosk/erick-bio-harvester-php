@@ -153,6 +153,7 @@
         $array_data = [];
         foreach ($attendance as $idx => $att) {
             array_push($array_data,[
+                "branch" => $savedBranchCode,
                 "AccessNo" => $att['userid'],
                 "Status"   => $att['state'],
                 "Datetime" => $att['timestamp']
@@ -162,9 +163,8 @@
             echo $result['message'] . "<br>";
         }
 
-    //    / $upload_staging = $db->stagingAPI($array_data);
-
-
+        $upload_staging = $db->stagingAPI($array_data);
+        
         $res =   $db->sendMail($filename,$savedCompany,$savedBranchCode,$email_body_date);
         $count_inserted =  isset($_GET['send_email']) ? 1 : 0;
         if ($res == 1 && $count_inserted > 0) {
