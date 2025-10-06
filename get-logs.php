@@ -6,6 +6,7 @@
 
 <body>
     <?php 
+     date_default_timezone_set('Asia/Manila');
     $filename = __DIR__ . '/ips.txt';
     if (file_exists($filename)) {
         $lines = file($filename, FILE_IGNORE_NEW_LINES);
@@ -105,7 +106,7 @@
     $attendance = $zk->getAttendance($date_range);
 
     sleep(1);
-
+   
     if (empty($attendance)) {
         die("❌ No attendance data found.");
     }
@@ -149,12 +150,21 @@
         $db = new Controller("db.txt");
 
         $count_inserted = 0;
+        $array_data = [];
         foreach ($attendance as $idx => $att) {
-
+            array_push($array_data,[
+                "AccessNo" => $att['userid'],
+                "Status"   => $att['state'],
+                "Datetime" => $att['timestamp']
+            ]);
             $result = $db->insert($att['userid'], $att['state'], $att['timestamp']);
             if (!$result['error']) $count_inserted++;
             echo $result['message'] . "<br>";
         }
+
+    //    / $upload_staging = $db->stagingAPI($array_data);
+
+
         $res =   $db->sendMail($filename,$savedCompany,$savedBranchCode,$email_body_date);
         $count_inserted =  isset($_GET['send_email']) ? 1 : 0;
         if ($res == 1 && $count_inserted > 0) {
