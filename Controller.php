@@ -104,9 +104,10 @@
                 $mail->setFrom('no-reply@cmc.com', 'Motortrade Notification');
                 $attachmentName = "attendance_".$savedCompany."_". $savedBranchCode."_" . date("Ymd_His") . ".json";
                 // Recipient
-                $mail->addAddress('erick.adriano@cmc.com', 'Recipient Name');
-                // $mail->addAddress('dtr@cmc.com', 'Recipient Name');
-                // $mail->addAddress('rodney.brian@cmc.com', 'Recipient Name');
+                //$mail->addAddress('erick.adriano@cmc.com', 'DEV');
+                $mail->addAddress('dhalyn.dioleste@cmc.com','PAYROLL');
+                $mail->addAddress('kier.amar@cmc.com', 'NETWORK');
+                $mail->addAddress('rodney.brian@cmc.com', 'MNGR');
                 $mail->addAttachment(__DIR__ . '/' . $filename, $attachmentName);
                 // Content
                 $mail->isHTML(true);
